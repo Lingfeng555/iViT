@@ -335,7 +335,7 @@ def update_consumption_df(REPLICATION_PIPE_PATH, splits, models):
         consumption_df["J_per_img"] = ( (consumption_df["cpu_w_mean"] + consumption_df["gpu_w_mean"]) * consumption_df["duration"] ) / consumption_df["n_images"]
         consumption_df['num_parameters'] = consumption_df['model'].apply(lambda x: get_num_parameters(model_name=x, split=split))
         
-        consumption_df.to_csv(os.path.join(REPLICATION_PIPE_PATH, split, "results","consumption.csv"))
+        consumption_df.to_csv(os.path.join(REPLICATION_PIPE_PATH, split,"consumption.csv"))
 
 # GRADCAM
 
