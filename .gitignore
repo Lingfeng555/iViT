@@ -1,0 +1,9 @@
+__pycache__/*
+Arquitecture/__pycache__/*
+Arquitecture/ExtractorComponent/__pycache__/*
+utils/__pycache__/*
+
+experiment_pipeline/*
+data/*
+replication_pipeline/*
+log/*
