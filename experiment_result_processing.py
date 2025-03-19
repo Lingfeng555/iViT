@@ -20,10 +20,9 @@ from sklearn.tree import DecisionTreeClassifier
 
 from utils.Loader import EMNISTDataset, FashionMNISTDataset
 from Arquitecture import InformationExtractor
-from experiment_hyperparameters import DEVICE, BATCH_SIZE, SEED, N_TRIALS, RESULT_PATH
+from experiment_hyperparameters import DEVICE, BATCH_SIZE, SEED, N_TRIALS, RESULT_PATH, THREADS
 from utils.AttentionGradCam import AttentionGradCAM
 import random
-
 # Experiment
 
 def emnist_number_to_text(idx):
@@ -430,7 +429,7 @@ def objective(trial, X, Y):
 
 def find_best_tree_params_optuna(X, Y, n_trials=50):
     study = optuna.create_study(direction="maximize")
-    study.optimize(lambda trial: objective(trial, X, Y), n_trials=n_trials)
+    study.optimize(lambda trial: objective(trial, X, Y), n_trials=n_trials, n_jobs=THREADS)
     print("Best Macro Precision Score:", study.best_trial.value)
     return study.best_trial.params
    
