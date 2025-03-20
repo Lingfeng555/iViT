@@ -114,7 +114,14 @@ def experiment(SPLIT: str, subinfo_size: int):
 
     # Training process
     trainer_logger.info(f"Training beging")
-    loss, model = train(model, optimizer, emnist_train_loader, criterion, trainer_logger)
+    try:
+        loss, model = train(model, optimizer, emnist_train_loader, criterion, trainer_logger)
+    except RuntimeError as e:
+        if 'out of memory' in str(e):
+            print("CUDA out of memory error caught!")
+            torch.cuda.empty_cache() 
+        else:
+            raise e
     trainer_logger.info(f"Training end")
 
     # Save the line chart of the loss funcion

@@ -32,8 +32,7 @@ def train_evaluate_and_meassure_the_models():
             
             watcher = ExperimentWatcher(base_path=f"{RESULT_PATH}/{split}/{size}")
             watcher.measure_energy_consumption(executable_file_path=TRAIN_SCRIPT, timelapse=1, split=split, subinfosize=size)
-            
-            time.sleep(10) # Wait 10 second to allow the gpu deallocate the memory
+            torch.cuda.empty_cache()
 
 def generate_gradcam_for_the_best_models():
     for split in SPLITS:
