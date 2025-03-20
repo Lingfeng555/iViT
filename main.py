@@ -3,6 +3,8 @@ import torch
 import numpy as np
 import random
 import os
+import time
+
 from utils.Watchers import ExperimentWatcher, ReplicationWatcher
 from experiment_hyperparameters import RESULT_PATH, SPLITS, REPLICATION_DURATION, REPLICATION_MODELS, REPLICATION_PATH, TRAIN_SCRIPT, REPLICATION_SCRIPT, SIZES, SEED
 from experiment_result_processing import process_experiment_result, generateGradCam, get_decision_tree_svg, get_best_size, update_consumption_df
@@ -30,6 +32,8 @@ def train_evaluate_and_meassure_the_models():
             
             watcher = ExperimentWatcher(base_path=f"{RESULT_PATH}/{split}/{size}")
             watcher.measure_energy_consumption(executable_file_path=TRAIN_SCRIPT, timelapse=1, split=split, subinfosize=size)
+            
+            time.sleep(10) # Wait 10 second to allow the gpu deallocate the memory
 
 def generate_gradcam_for_the_best_models():
     for split in SPLITS:

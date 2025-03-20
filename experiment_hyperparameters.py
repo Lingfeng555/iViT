@@ -5,7 +5,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 LEARNING_RATE = 0.000125
 EPOCH = 1#1000
-BATCH_SIZE = 4000#30000
+BATCH_SIZE = 4000#27000
 THREADS = 8#32
 DEFAULT_LOG_FILE = "log"
 RESULT_PATH = "experiment_pipeline"
