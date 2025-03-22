@@ -7,7 +7,7 @@ import time
 
 from utils.Watchers import ExperimentWatcher, ReplicationWatcher
 from experiment_hyperparameters import RESULT_PATH, SPLITS, REPLICATION_DURATION, REPLICATION_MODELS, REPLICATION_PATH, TRAIN_SCRIPT, REPLICATION_SCRIPT, SIZES, SEED
-from experiment_result_processing import process_experiment_result, generateGradCam, get_decision_tree_svg, get_best_size, update_consumption_df
+from experiment_result_processing import process_experiment_result, generateGradCam, get_decision_tree_svg, get_agglomerative_dendrogram_svg, get_best_size, update_consumption_df
 from utils.DefaultLogger import DefaultLogger
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -69,12 +69,14 @@ def generate_experts_trees_svg():
         csv_file = os.path.join(RESULT_PATH, split, str(best_size), "expert_data.csv")
         get_decision_tree_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="pred_label")
         get_decision_tree_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="true_label")
+        #get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="pred_label")
+        #get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="true_label")
 
 if __name__ == '__main__':
 
     set_torch_seed(SEED)
     
-    #train_evaluate_and_meassure_the_models()
+    train_evaluate_and_meassure_the_models()
     
     process_experiment_result(RESULT_PATH)
     
@@ -82,8 +84,8 @@ if __name__ == '__main__':
     
     generate_experts_trees_svg()
         
-    #replicate_other_classical_models_and_meassure_the_energy_consumption()
+    replicate_other_classical_models_and_meassure_the_energy_consumption()
     
-    #update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
+    update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
     
 

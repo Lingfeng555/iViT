@@ -18,6 +18,9 @@ import optuna
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 import json
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import adjusted_rand_score
+from scipy.cluster.hierarchy import linkage, dendrogram
 
 from utils.Loader import EMNISTDataset, FashionMNISTDataset
 from Arquitecture import InformationExtractor
@@ -440,7 +443,7 @@ def generateGradCam(result_path: str, split: str, sample_size: int):
 
 # Decision tree
 
-def objective(trial, X, Y):
+def tree_objective(trial, X, Y):
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
     max_depth = trial.suggest_int("max_depth", 1, 20)
     min_samples_split = trial.suggest_int("min_samples_split", 2, 20)
@@ -460,7 +463,7 @@ def objective(trial, X, Y):
 
 def find_best_tree_params_optuna(X, Y, n_trials=50):
     study = optuna.create_study(direction="maximize")
-    study.optimize(lambda trial: objective(trial, X, Y), n_trials=n_trials, n_jobs=THREADS)
+    study.optimize(lambda trial: tree_objective(trial, X, Y), n_trials=n_trials, n_jobs=THREADS)
     print("Best Macro Precision Score:", study.best_trial.value)
     return study.best_trial
    
@@ -468,7 +471,7 @@ def get_decision_tree_svg(csv_file:str, result_path: str, target_label: bool):
     type = csv_file.split("/")[-3]
     df = pd.read_csv(csv_file)
     y = df[target_label]
-    X = df.drop(columns=["true_label", "pred_label"])
+    X = df.drop(columns=["true_label", "pred_label"]).loc[:, (df != 0).any(axis=0)]
     
     best_best_trial = find_best_tree_params_optuna(X, y, n_trials=N_TRIALS)
 
@@ -495,6 +498,49 @@ def get_decision_tree_svg(csv_file:str, result_path: str, target_label: bool):
 
     svg_file = f"{result_path}/{type}.svg"
     subprocess.run(["dot", "-Tsvg", dot_file, "-o", svg_file], check=True)
-    predictions = clf.predict(X)
-    precision = precision_score(y, predictions, average="macro")
-    print("La precisión del modelo es: {:.4f}%".format(precision * 100))
+
+# Dendograms
+
+def cluster_objective(trial, X, Y):
+    n_clusters = trial.suggest_int("n_clusters", 10, 47)
+    linkage = trial.suggest_categorical("linkage", ["complete", "average", "single"])
+    model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
+    y_pred = model.fit_predict(X)
+    score = adjusted_rand_score(Y, y_pred)
+    return score
+
+def find_best_agglomerative_params_optuna(X, Y, n_trials=50):
+    study = optuna.create_study(direction="maximize")
+    study.optimize(lambda trial: cluster_objective(trial, X, Y), n_trials=n_trials, n_jobs=THREADS)
+    print("Best Adjusted Rand Score:", study.best_trial.value)
+    return study.best_trial
+
+def get_agglomerative_dendrogram_svg(csv_file: str, result_path: str, target_label: bool):
+    type_name = csv_file.split("/")[-3]
+    df = pd.read_csv(csv_file)
+    y = df["pred_label"]
+    X = df.drop(columns=["true_label", "pred_label"]).loc[:, (df != 0).any(axis=0)] # Drop the pruned experts    
+
+    best_best_trial = find_best_agglomerative_params_optuna(X, y, n_trials=N_TRIALS)
+    result_path = f"{result_path}/hierarchy/{target_label}/{type_name}"
+    os.makedirs(result_path, exist_ok=True)
+
+    with open(f"{result_path}/best_params.json", "w") as f:
+        temp_dict = {"Best_params": best_best_trial.params, "Precision_Score": best_best_trial.value}
+        print(best_best_trial.params)
+        json.dump(temp_dict, f, indent=4)
+    
+    # Extract the clustering method and distance metric based on best parameters.
+    # For example, if the best linkage is "ward", then we must use "euclidean" distance.
+    linkage_method = best_best_trial.params["linkage"]
+    metric = "euclidean"  
+    Z = linkage(X, method=linkage_method, metric=metric)
+    
+    plt.figure(figsize=(10, 7))
+    dendrogram(Z, labels=df.index.astype(str).tolist())
+    plt.title("Agglomerative Clustering Dendrogram")
+    plt.xlabel("Sample Index")
+    plt.ylabel("Distance")
+    svg_file = os.path.join(result_path, type_name + ".svg")
+    plt.savefig(svg_file, format="svg")
+    plt.close()
