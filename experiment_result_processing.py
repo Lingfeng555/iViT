@@ -17,6 +17,7 @@ from sklearn.metrics import precision_score
 import optuna
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+import json
 
 from utils.Loader import EMNISTDataset, FashionMNISTDataset
 from Arquitecture import InformationExtractor
@@ -38,8 +39,19 @@ def emnist_number_to_text(idx):
 
 def rebuild_model(dataset: str, size: int, path: str):
     if dataset == "balanced": model = InformationExtractor(output_len=47, subinfo_size=size)
-    else: model = InformationExtractor(output_len=10, subinfo_size=size)
+    else: 
+        model = InformationExtractor(output_len=10, subinfo_size=size)
+
     model.load_state_dict(torch.load(path, map_location=torch.device(DEVICE)))
+
+    folder, _ = os.path.split(path)
+    pruned_expert_path = os.path.join(folder,"pruned_experts.json")
+    if os.path.exists(pruned_expert_path):
+        with open(pruned_expert_path, 'rb') as f:
+            pruned_expert = json.load(f)
+            model.prune_experts(list_of_experts=pruned_expert)
+    
+    model.to(DEVICE)
     model.eval()
     return model
 
@@ -96,12 +108,31 @@ def process_and_save_plots(PIPE_PATH: str):
                         if os.path.isdir(os.path.join(PIPE_PATH, dataset, d)) and (d[0] in "0123456789") ])
         test_set = build_dataset(dataset=dataset)
         for size in models:
+
+            #Analyze and test the models
             model_path  = os.path.join(PIPE_PATH, dataset, size, "model.pth")
             model = rebuild_model(dataset=dataset, size=int(size), path=model_path).to(DEVICE)
-            num_parameters = sum(p.numel() for p in model.parameters())
             true_labels, pred_labels, expert_outputs = get_results(test_set, model)
+            df = pd.DataFrame(expert_outputs)
+
+            #Use the experts output of the 
+            experts_to_prune = []
+            for i in range(model.num_experts):
+                prunable = True
+                for j in range(model.subinfo_size):
+                    prunable = prunable and (df[f'expert_{i}_{j}'] == 0).all()
+                if prunable:
+                    experts_to_prune.append(i)
+            df.to_csv( os.path.join(PIPE_PATH, dataset, size,"expert_data.csv") )
+            model.prune_experts(experts_to_prune)
+            
+            with open(os.path.join(PIPE_PATH, dataset, size,"pruned_experts.json"), 'w') as f:
+                json.dump(experts_to_prune, f)
+
+            #Plot the results
+            num_parameters = sum(p.numel() for p in model.parameters())
             plot_and_save_confusion_matrix(true_labels=true_labels, pred_labels=pred_labels, save_path=os.path.join(PIPE_PATH, dataset, size,"confusion_matrix.png"), num_parameters=num_parameters)
-            pd.DataFrame(expert_outputs).to_csv( os.path.join(PIPE_PATH, dataset, size,"expert_data.csv") )
+
 
 def read_csv_files(folder_path):
     csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
@@ -403,7 +434,7 @@ def generateGradCam(result_path: str, split: str, sample_size: int):
 
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         os.makedirs(f"{result_path}/{split}/BestModel_GradCam/", exist_ok=True)
-        plt.savefig(f"{result_path}/{split}/BestModel_GradCam//GradCam_{emnist_number_to_text(label_val)}.png")
+        plt.savefig(f"{result_path}/{split}/BestModel_GradCam/GradCam_{emnist_number_to_text(label_val)}.png")
         
         plt.close()
 
@@ -431,20 +462,27 @@ def find_best_tree_params_optuna(X, Y, n_trials=50):
     study = optuna.create_study(direction="maximize")
     study.optimize(lambda trial: objective(trial, X, Y), n_trials=n_trials, n_jobs=THREADS)
     print("Best Macro Precision Score:", study.best_trial.value)
-    return study.best_trial.params
+    return study.best_trial
    
 def get_decision_tree_svg(csv_file:str, result_path: str, target_label: bool):
     type = csv_file.split("/")[-3]
     df = pd.read_csv(csv_file)
-    y = df["pred_label"]
+    y = df[target_label]
     X = df.drop(columns=["true_label", "pred_label"])
     
-    best_params = find_best_tree_params_optuna(X, y, n_trials=N_TRIALS)
-    clf = DecisionTreeClassifier(**best_params, random_state=SEED)
+    best_best_trial = find_best_tree_params_optuna(X, y, n_trials=N_TRIALS)
+
+    result_path = f"{result_path}/bias_check/{target_label}/{type}"
+    os.makedirs(result_path, exist_ok=True)
+
+    with open(f"{result_path}/best_params.json", "w") as f:
+        temp_dict = {"Best_params": best_best_trial.params, "Precision_Score": best_best_trial.value}
+        json.dump(temp_dict, f, indent=4)
+
+    clf = DecisionTreeClassifier(**best_best_trial.params, random_state=SEED)
     clf.fit(X, y)
 
-    dot_file = f"{result_path}/bias_check/{target_label}/" + type + ".dot"
-    os.makedirs(f"{result_path}/bias_check/{target_label}/", exist_ok=True)
+    dot_file = f"{result_path}/{type}.dot"
     
     with open(dot_file, "w") as f:
         export_graphviz(clf,
@@ -455,7 +493,7 @@ def get_decision_tree_svg(csv_file:str, result_path: str, target_label: bool):
                         rounded=True,
                         special_characters=True)
 
-    svg_file = f"{result_path}/bias_check/{target_label}/" + type + ".svg"
+    svg_file = f"{result_path}/{type}.svg"
     subprocess.run(["dot", "-Tsvg", dot_file, "-o", svg_file], check=True)
     predictions = clf.predict(X)
     precision = precision_score(y, predictions, average="macro")

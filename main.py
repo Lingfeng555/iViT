@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     set_torch_seed(SEED)
     
-    train_evaluate_and_meassure_the_models()
+    #train_evaluate_and_meassure_the_models()
     
     process_experiment_result(RESULT_PATH)
     
@@ -82,8 +82,8 @@ if __name__ == '__main__':
     
     generate_experts_trees_svg()
         
-    replicate_other_classical_models_and_meassure_the_energy_consumption()
+    #replicate_other_classical_models_and_meassure_the_energy_consumption()
     
-    update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
+    #update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
     
 

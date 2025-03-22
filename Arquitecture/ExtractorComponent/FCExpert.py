@@ -3,8 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class FCExpert(nn.Module):
+    output_size : int
+
     def __init__(self, output_size = 2):
         super(FCExpert, self).__init__()
+        self.output_size = output_size
         self.fc1 = nn.Linear(49, 40)
         self.fc2 = nn.Linear(40, 30)
         self.fc3 = nn.Linear(30, 20)

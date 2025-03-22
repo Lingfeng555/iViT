@@ -26,4 +26,4 @@ for i in range(8):
     
 REPLICATION_SCRIPT = "replication.py"
 
-N_TRIALS = 1 #2000
+N_TRIALS = 20 #2000
