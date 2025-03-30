@@ -13,9 +13,9 @@ DEFAULT_LOG_FILE = "log"
 TRAIN_SCRIPT = "train.py"
 
 # Result_Path
-RESULT = "results"
+RESULT = "iViT_RESULTS"
 RESULT_PATH = f"{RESULT}/experiment_pipeline"
-REPLICATION_PATH = f"{RESULT_PATH}/replication_pipeline"
+REPLICATION_PATH = f"{RESULT}/replication_pipeline"
 
 # Sizes of training models
 SPLITS = ["digits", "fashion", "balanced"]
