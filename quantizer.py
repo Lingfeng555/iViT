@@ -42,11 +42,13 @@ for model in models:
     calibration_samples = []
     
     for i in range(num_calibration_samples):
-        sample = dataset[i]
+        sample =  dataset[i]
         if isinstance(sample, tuple):  # If dataset returns (input, label) pairs
             sample = sample[0]
         if not isinstance(sample, np.ndarray):
             sample = np.array(sample, dtype=np.float32)
+	if sample.ndim == 3:
+            sample = np.expand_dims(sample, axis=0)
         calibration_samples.append(sample)
     
     # Create the calibration data reader
