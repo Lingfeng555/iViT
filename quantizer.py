@@ -2,7 +2,7 @@ import os
 import vai_q_onnx
 import numpy as np
 import onnx
-from onnxruntime.quantization.calibrate import CalibrationDataReade
+from onnxruntime.quantization.calibrate import CalibrationDataReader
 from experiment_hyperparameters import DEVICE, SPLITS, RESULT_PATH
 from experiment_result_processing import get_best_size, build_dataset
 
