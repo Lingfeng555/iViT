@@ -1,0 +1,6 @@
+{
+    "lib": "libvart-dpu-runner.so",
+    "filename": "model_fashion_4_int8.xmodel",
+    "kernel": "",
+    "target": "DPUCZDX8G_ISA1_B2304"
+}
