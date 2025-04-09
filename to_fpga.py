@@ -9,5 +9,4 @@ dummy_input =torch.randn(32, 1, 28, 28).to(DEVICE)
 for split in SPLITS:
     best_size = get_best_size(path=f"{RESULT_PATH}", split=split)
     model = rebuild_model(dataset=split, size=best_size, path=f"{RESULT_PATH}/{split}/{best_size}/model.pth")
-    torch.onnx.export(model, dummy_input, f"model_{split}_{split}.onnx", opset_version=11)
-    break
+    torch.onnx.export(model, dummy_input, f"onnx/model_{split}_{best_size}.onnx", opset_version=11)
