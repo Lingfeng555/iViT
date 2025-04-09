@@ -86,14 +86,14 @@ class InformationExtractor (nn.Module):
     
 if __name__ == "__main__":
     # Testing
-    model = InformationExtractor(output_len=6)
-    input_tensor = torch.randn(32, 1, 28, 28)  
+    model = InformationExtractor(output_len=6).to(DEVICE)
+    input_tensor = torch.randn(32, 1, 28, 28).to(DEVICE)
     output = model(input_tensor)
     
     print("Forma de la salida después de `view`:", output.shape)
     print(f"Model parameters: {sum(p.numel() for p in model.parameters())}")
     pruning_list = list(range(20,50))
     model.prune_experts(pruning_list)
-    input_tensor = torch.randn(32, 1, 28, 28)  
+    input_tensor = torch.randn(32, 1, 28, 28).to(DEVICE)
     output = model(input_tensor)
     print(f"Model parameters: {sum(p.numel() for p in model.parameters())}")

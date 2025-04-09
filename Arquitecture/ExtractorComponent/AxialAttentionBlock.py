@@ -35,7 +35,6 @@ class AttentionBlock(nn.Module):
 
     def forward(self, x):
         batch_size, num_features, h, w = x.shape  
-        assert h == self.height and w == self.width, f"Expected input shape [batch_size, num_features, {self.height}, {self.width}]"
         
         x = x.view(batch_size, num_features, -1)  
         
