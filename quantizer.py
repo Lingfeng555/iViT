@@ -47,7 +47,7 @@ for model in models:
             sample = sample[0]
         if not isinstance(sample, np.ndarray):
             sample = np.array(sample, dtype=np.float32)
-	if sample.ndim == 3:
+        if sample.ndim == 3:
             sample = np.expand_dims(sample, axis=0)
         calibration_samples.append(sample)
     
