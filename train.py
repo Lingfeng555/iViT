@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import Adam
 import numpy as np
-
+import time
 from Arquitecture.InformationExtractor import InformationExtractor
 from utils.Loader import *
 from utils.DefaultLogger import DefaultLogger
@@ -143,4 +143,13 @@ def experiment(SPLIT: str, subinfo_size: int):
 if __name__ == '__main__':
     split = sys.argv[1]
     subinfo_size = int(sys.argv[2])
-    experiment(SPLIT=split, subinfo_size=subinfo_size)
+    
+    try:
+        experiment(SPLIT=split, subinfo_size=subinfo_size)
+    except RuntimeError as e:
+        if "CUBLAS_STATUS_ALLOC_FAILED" in str(e):
+            torch.cuda.empty_cache()
+            time.sleep(1)
+            experiment(SPLIT=split, subinfo_size=subinfo_size)
+        else:
+            raise e

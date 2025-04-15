@@ -400,7 +400,7 @@ def generateGradCam(result_path: str, split: str, sample_size: int):
 
         # Create subplots
         fig, axes = plt.subplots(nrows=len(sample_indices), ncols=2, figsize=(10, 2 * len(sample_indices)))
-        fig.suptitle(f"Categoría {(label_val)}", fontsize=16)
+        fig.suptitle(f"Category {(label_val)}", fontsize=16)
 
         # Just if the there is only one subplot
         if len(sample_indices) == 1:
@@ -427,12 +427,12 @@ def generateGradCam(result_path: str, split: str, sample_size: int):
 
             # Show the original image
             axes[i, 0].imshow(img_np)
-            axes[i, 0].set_title(f"Original (clase {emnist_number_to_text(label_val)})")
+            axes[i, 0].set_title(f"Original (class {emnist_number_to_text(label_val)})")
             axes[i, 0].axis("off")
 
             # Show the gradcam 
             axes[i, 1].imshow(superimposed_img)
-            axes[i, 1].set_title(f"Grad-CAM (pred {emnist_number_to_text(predicted_class)})")
+            axes[i, 1].set_title(f"Grad-CAM (prediction {emnist_number_to_text(predicted_class)})")
             axes[i, 1].axis("off")
 
         plt.tight_layout(rect=[0, 0, 1, 0.95])

@@ -3,10 +3,10 @@ import torch
 import numpy as np
 import random
 import os
-import time
+import shutil
 
 from utils.Watchers import ExperimentWatcher, ReplicationWatcher
-from experiment_hyperparameters import RESULT_PATH, SPLITS, REPLICATION_DURATION, REPLICATION_MODELS, REPLICATION_PATH, TRAIN_SCRIPT, REPLICATION_SCRIPT, SIZES, SEED
+from experiment_hyperparameters import RESULT_PATH, SPLITS, REPLICATION_DURATION, REPLICATION_MODELS, REPLICATION_PATH, TRAIN_SCRIPT, REPLICATION_SCRIPT, SIZES, SEED, SEEDS
 from experiment_result_processing import process_experiment_result, generateGradCam, get_decision_tree_svg, get_agglomerative_dendrogram_svg, get_best_size, update_consumption_df
 from utils.DefaultLogger import DefaultLogger
 import warnings
@@ -72,8 +72,8 @@ def generate_experts_trees_svg():
         #get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="pred_label")
         #get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="true_label")
 
-if __name__ == '__main__':
-
+def main ():
+    
     set_torch_seed(SEED)
     
     #train_evaluate_and_meassure_the_models()
@@ -87,5 +87,59 @@ if __name__ == '__main__':
     #replicate_other_classical_models_and_meassure_the_energy_consumption()
     
     #update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
+
+def remove_folder (folder_path:str):
+    try:
+        shutil.rmtree(folder_path)
+        main_logger.info(f"The foder'{folder_path}' was removed")
+    except FileNotFoundError:
+        main_logger.info(f"The folder '{folder_path}' does not exist.")
+    except PermissionError:
+        main_logger.info(f"To remove {folder_path} use sudo")
+    except OSError as e:
+        main_logger.info(f"error: {e}")
+                
+def remove_cpu_and_gpu_data ():
+    for size in SIZES:
+        for split in SPLITS:
+            cpu_folder = os.path.join(RESULT_PATH, split, str(size), "cpu")
+            gpu_folder = os.path.join(RESULT_PATH, split, str(size), "gpu")
+            remove_folder(cpu_folder)
+            remove_folder(gpu_folder)
+
+def rename_folder(seed: int):
+    old_folder = RESULT_PATH
+    new_folder = f"{RESULT_PATH}_{seed}"
+
+    try:
+        os.rename(old_folder, new_folder)
+        main_logger.info(f"The folder '{old_folder}' has been renamed to '{new_folder}'")
+    except FileNotFoundError:
+        main_logger.info(f"The folder '{old_folder}' was not found.")
+    except PermissionError:
+        main_logger.info("You do not have sufficient permissions to rename this folder.")
+    except OSError as e:
+        main_logger.info(f"An error occurred while renaming the folder: {e}")
+        
+def main_several_seeds():
+    for seed in SEEDS:
+        main_logger.info(f"Performing the experiment for the seed: {seed}")
+        # Set the seed
+        set_torch_seed(seed)
+        # Experiment
+        train_evaluate_and_meassure_the_models()
+        process_experiment_result(RESULT_PATH)
+        generate_gradcam_for_the_best_models()
+        generate_experts_trees_svg()
+        # Remove unneccessary data
+        remove_cpu_and_gpu_data()
+        # Change the name of the dir
+        rename_folder(seed)
+        torch.cuda.empty_cache() 
+    
+    
+if __name__ == '__main__':
+
+    main_several_seeds()
     
 

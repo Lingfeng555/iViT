@@ -2,6 +2,7 @@ import torch
 
 # Seed and device
 SEED = 555
+SEEDS = [_ for _ in range(1, 150)]
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Training variables
@@ -18,7 +19,11 @@ RESULT_PATH = f"{RESULT}/experiment_pipeline"
 REPLICATION_PATH = f"{RESULT}/replication_pipeline"
 
 # Sizes of training models
-SPLITS = ["digits", "fashion", "balanced"]
+SPLITS = [
+    #"digits", 
+    "fashion", 
+    #"balanced"
+    ]
 SIZES = [_ for _ in range(1, 11)]
 
 # Replication models
@@ -32,4 +37,4 @@ for i in range(8):
     REPLICATION_MODELS.append("efficientnet_b"+str(i))
 REPLICATION_SCRIPT = "replication.py"
 
-N_TRIALS = 20 #2000
+N_TRIALS = 1 #1200
