@@ -20,9 +20,9 @@ REPLICATION_PATH = f"{RESULT}/replication_pipeline"
 
 # Sizes of training models
 SPLITS = [
-    #"digits", 
+    "digits", 
     "fashion", 
-    #"balanced"
+    "balanced"
     ]
 SIZES = [_ for _ in range(1, 11)]
 

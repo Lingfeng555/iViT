@@ -136,7 +136,6 @@ def process_and_save_plots(PIPE_PATH: str):
             num_parameters = sum(p.numel() for p in model.parameters())
             plot_and_save_confusion_matrix(true_labels=true_labels, pred_labels=pred_labels, save_path=os.path.join(PIPE_PATH, dataset, size,"confusion_matrix.png"), num_parameters=num_parameters)
 
-
 def read_csv_files(folder_path):
     csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
     df_list = []
