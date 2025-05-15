@@ -69,24 +69,24 @@ def generate_experts_trees_svg():
         csv_file = os.path.join(RESULT_PATH, split, str(best_size), "expert_data.csv")
         get_decision_tree_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="pred_label")
         get_decision_tree_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="true_label")
-        #get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="pred_label")
-        #get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="true_label")
+        get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="pred_label")
+        get_agglomerative_dendrogram_svg(csv_file=csv_file, result_path=RESULT_PATH, target_label="true_label")
 
 def main ():
     
     set_torch_seed(SEED)
     
-    #train_evaluate_and_meassure_the_models()
+    train_evaluate_and_meassure_the_models()
     
-    #process_experiment_result(RESULT_PATH)
+    process_experiment_result(RESULT_PATH)
     
-    #generate_gradcam_for_the_best_models()
+    generate_gradcam_for_the_best_models()
     
     generate_experts_trees_svg()
         
-    #replicate_other_classical_models_and_meassure_the_energy_consumption()
+    replicate_other_classical_models_and_meassure_the_energy_consumption()
     
-    #update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
+    update_consumption_df(REPLICATION_PATH, SPLITS, REPLICATION_MODELS)
 
 def remove_folder (folder_path:str):
     try:
