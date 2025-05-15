@@ -1,44 +1,49 @@
 # How to Replicate the Experiment
 
-1. Prerequisites
+## 1. Prerequisites
 
-    Python: 3.12.3
+- Python 3.12.3
+- Git
+- Graphviz CLI (provides the dot tool)
 
-    Git
+## 2. Clone the Repository
 
-    Graphviz CLI (for the dot tool)
-
-2. Clone the Repository
-
+```bash
 git clone <repository-url>
 cd <repository-name>
+```
 
-3. Install System Dependencies
+## 3. Install System Dependencies
 
+```bash
 sudo apt update
 sudo apt install -y graphviz
+```
 
-4. Install Python Dependencies
+## 4. Install Python Dependencies
 
-    Note: Be sure you’re using the intended Python interpreter or virtual environment.
+Ensure you are using the correct Python interpreter or have activated your virtual environment.
 
+```bash
 pip install -r requirements.txt
 pip install graphviz
+```
 
-5. Configure
+## 5. Configure Settings
 
-    measurer.py
-    This file interfaces directly with your firmware. If your setup differs from ours, edit it as needed—but please review it carefully before running.
+- **measurer.py**  
+    This file interfaces directly with your firmware. If your setup differs, modify it accordingly and review changes carefully before running.
 
-    experiment_hyperparameters.py
-    All tunable values (e.g. sample size, timing, etc.) live here. By default, this matches the settings from the original paper; feel free to adjust.
+- **experiment_hyperparameters.py**  
+    Contains all tunable settings (e.g., sample size, timing). These default values match the original paper's configuration but can be adjusted as needed.
 
-6. Run the Experiment
+## 6. Run the Experiment
 
+```bash
 sudo python3 main.py
+```
 
-    Why sudo?
-    The script communicates directly with firmware, so elevated privileges are required.
+> **Note:** Running the experiment with `sudo` is required since the script interacts directly with the firmware, necessitating elevated privileges.
 
 # Repository Structure
 
